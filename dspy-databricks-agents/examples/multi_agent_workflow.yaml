@@ -1,0 +1,150 @@
+# Multi-Agent Workflow Example
+# This demonstrates how to orchestrate multiple specialized agents
+# working together on a complex task like content creation.
+
+agent:
+  name: content-creation-pipeline
+  version: 1.0.0
+  description: Multi-agent pipeline for research, writing, and review
+  
+  dspy:
+    lm_model: databricks-llama-2-70b-chat
+    temperature: 0.8
+    max_tokens: 4000
+    
+  # Import reusable agent configurations
+  imports:
+    - path: ./rag_research_agent.yaml
+      prefix: research
+    - path: ./code_review_agent.yaml  # Can review technical content
+      prefix: reviewer
+      
+  modules:
+    # Research phase - imported from rag_research_agent
+    - name: research_agent
+      type: imported
+      from: research.modules
+      
+    # Writing phase - custom modules
+    - name: outline_generator
+      type: chain_of_thought
+      signature: "topic, research_findings, target_audience -> outline, key_sections, estimated_length"
+      
+    - name: content_writer
+      type: chain_of_thought
+      signature: "outline, section, research_context, style_guide -> content, citations_needed"
+      
+    - name: editor
+      type: chain_of_thought
+      signature: "draft_content, style_guide, target_audience -> edited_content, changes_made, suggestions"
+      
+    # Review phase - can use imported reviewer
+    - name: technical_reviewer
+      type: imported
+      from: reviewer.modules.review_summarizer
+      
+    # Final assembly
+    - name: content_assembler
+      type: signature
+      signature: "sections, metadata, citations -> final_document, table_of_contents, word_count"
+      
+  workflow:
+    # Phase 1: Research
+    - step: conduct_research
+      module: research_agent
+      inputs:
+        query: "$input.topic"
+        required_sources: "$input.research_sources"
+        
+    # Phase 2: Create outline
+    - step: generate_outline
+      module: outline_generator
+      inputs:
+        topic: "$input.topic"
+        research_findings: "$conduct_research.synthesis"
+        target_audience: "$input.target_audience"
+        
+    # Phase 3: Write sections (can be parallelized in future)
+    - step: write_introduction
+      module: content_writer
+      inputs:
+        outline: "$generate_outline.outline"
+        section: "introduction"
+        research_context: "$conduct_research.key_points"
+        style_guide: "$input.style_guide"
+        
+    - step: write_main_content
+      module: content_writer
+      inputs:
+        outline: "$generate_outline.outline"
+        section: "main_body"
+        research_context: "$conduct_research.synthesis"
+        style_guide: "$input.style_guide"
+        
+    - step: write_conclusion
+      module: content_writer
+      inputs:
+        outline: "$generate_outline.outline"
+        section: "conclusion"
+        research_context: "$conduct_research.key_points"
+        style_guide: "$input.style_guide"
+        
+    # Phase 4: Edit content
+    - step: edit_content
+      module: editor
+      inputs:
+        draft_content: {
+          introduction: "$write_introduction.content",
+          main_body: "$write_main_content.content",
+          conclusion: "$write_conclusion.content"
+        }
+        style_guide: "$input.style_guide"
+        target_audience: "$input.target_audience"
+        
+    # Phase 5: Technical review (if needed)
+    - step: review_technical_content
+      module: technical_reviewer
+      condition: "$input.content_type == 'technical'"
+      inputs:
+        content: "$edit_content.edited_content"
+        criteria: ["accuracy", "clarity", "completeness"]
+        
+    # Phase 6: Assemble final document
+    - step: assemble_document
+      module: content_assembler
+      inputs:
+        sections: "$edit_content.edited_content"
+        metadata: {
+          title: "$input.topic",
+          author: "$input.author",
+          date: "$input.date",
+          version: "1.0"
+        }
+        citations: "$conduct_research.citations"
+        
+  deployment:
+    catalog: content
+    schema: pipelines
+    model_name: content_creation_pipeline
+    serving_endpoint: content-generator
+    compute_size: Large
+    parallel_execution: true
+    
+  metadata:
+    supported_content_types:
+      - blog_post
+      - technical_article
+      - whitepaper
+      - documentation
+      - report
+    max_content_length: 10000
+    supported_styles:
+      - academic
+      - business
+      - casual
+      - technical
+    output_formats:
+      - markdown
+      - html
+      - docx
+      - pdf

@@ -1,0 +1,109 @@
+# Data Analysis Agent Example
+# This agent converts natural language questions into SQL queries,
+# executes them, and generates insights with visualization recommendations.
+
+agent:
+  name: data-analysis-agent
+  version: 1.0.0
+  description: Natural language to SQL with insight generation and visualization
+  
+  dspy:
+    lm_model: databricks-meta-llama-3-70b-instruct
+    temperature: 0.3  # Lower temperature for more consistent SQL generation
+    max_tokens: 2000
+    optimizer:
+      type: MIPRO
+      metric: sql_accuracy
+      num_candidates: 20
+      requires_permission: true
+  
+  modules:
+    # Step 1: Extract data analysis intent
+    - name: query_analyzer
+      type: signature
+      signature: "natural_language_query, available_tables -> analysis_type, required_tables, time_range"
+    
+    # Step 2: Generate SQL query
+    - name: sql_generator
+      type: chain_of_thought
+      signature: "question, schema, analysis_type, required_tables -> sql_query, explanation"
+      
+    # Step 3: Validate SQL safety
+    - name: sql_validator
+      type: signature
+      signature: "sql_query -> is_safe, has_write_operations, estimated_cost"
+      
+    # Step 4: Generate insights from results
+    - name: insight_generator
+      type: chain_of_thought
+      signature: "question, sql_query, query_results -> insights, key_findings, recommendations"
+      
+    # Step 5: Recommend visualizations
+    - name: visualization_recommender
+      type: signature
+      signature: "insights, data_shape, analysis_type -> visualization_type, chart_config, description"
+      
+  workflow:
+    # Analyze the user's question
+    - step: analyze_query
+      module: query_analyzer
+      inputs:
+        natural_language_query: "$input.query"
+        available_tables: "$input.table_schema"
+        
+    # Generate SQL based on analysis
+    - step: generate_sql
+      module: sql_generator
+      inputs:
+        question: "$input.query"
+        schema: "$input.table_schema"
+        analysis_type: "$analyze_query.analysis_type"
+        required_tables: "$analyze_query.required_tables"
+        
+    # Validate SQL before execution
+    - step: validate_sql
+      module: sql_validator
+      inputs:
+        sql_query: "$generate_sql.sql_query"
+        
+    # Only proceed if SQL is safe
+    - step: generate_insights
+      module: insight_generator
+      condition: "$validate_sql.is_safe == true"
+      inputs:
+        question: "$input.query"
+        sql_query: "$generate_sql.sql_query"
+        query_results: "$input.query_results"  # Passed from external SQL executor
+        
+    # Recommend visualization
+    - step: recommend_visualization
+      module: visualization_recommender
+      condition: "$generate_insights.insights != null"
+      inputs:
+        insights: "$generate_insights.insights"
+        data_shape: "$input.data_shape"
+        analysis_type: "$analyze_query.analysis_type"
+        
+  deployment:
+    catalog: analytics
+    schema: agents
+    model_name: data_analyst_agent
+    serving_endpoint: analytics-assistant
+    compute_size: Medium
+    environment_vars:
+      MAX_QUERY_ROWS: "10000"
+      QUERY_TIMEOUT_SECONDS: "30"
+      
+  metadata:
+    supported_databases:
+      - databricks_unity_catalog
+      - snowflake
+      - bigquery
+    max_tables_per_query: 5
+    supported_visualizations:
+      - line_chart
+      - bar_chart
+      - scatter_plot
+      - heatmap
+      - pie_chart
+      - histogram

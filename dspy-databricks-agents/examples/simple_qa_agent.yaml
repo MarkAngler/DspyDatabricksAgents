@@ -1,0 +1,35 @@
+# Simple Q&A Agent Example
+# This is a minimal example showing the basic structure
+# for a question-answering agent using DSPy signatures.
+
+agent:
+  name: simple-qa-agent
+  version: 1.0.0
+  description: Basic question-answering agent with single-stage processing
+  
+  # Minimal DSPy configuration
+  dspy:
+    lm_model: databricks-dolly-v2-12b
+    temperature: 0.7
+    max_tokens: 500
+    
+  # Single module definition
+  modules:
+    - name: qa_module
+      type: signature
+      signature: "question -> answer"
+      
+  # Simple workflow with one step
+  workflow:
+    - step: answer_question
+      module: qa_module
+      inputs:
+        question: "$input.query"
+        
+  # Optional deployment configuration
+  deployment:
+    catalog: demos
+    schema: agents
+    model_name: simple_qa
+    serving_endpoint: qa-demo
+    compute_size: Small

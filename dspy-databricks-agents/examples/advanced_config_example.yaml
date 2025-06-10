@@ -1,0 +1,186 @@
+# Advanced Configuration Example
+# This file demonstrates environment variables, imports, and advanced features
+
+# Environment variables can be used throughout the configuration
+agent:
+  name: "${AGENT_NAME:-advanced-example-agent}"
+  version: "${AGENT_VERSION:-1.0.0}"
+  description: Advanced configuration demonstrating all features
+  
+  dspy:
+    # Use environment variable for model selection
+    lm_model: "${LLM_MODEL:-databricks-dbrx-instruct}"
+    temperature: ${TEMPERATURE:-0.7}
+    max_tokens: ${MAX_TOKENS:-1500}
+    
+    # Advanced optimizer configuration
+    optimizer:
+      type: "${OPTIMIZER_TYPE:-MIPRO}"
+      metric: custom_metric
+      num_candidates: ${NUM_CANDIDATES:-20}
+      # Custom optimizer parameters
+      config:
+        bootstrapped_demos: true
+        max_bootstrapped_demos: ${MAX_DEMOS:-5}
+        prompt_model: "${PROMPT_MODEL}"
+        task_model: "${TASK_MODEL}"
+        
+  # Imports for reusable components
+  imports:
+    # Import shared modules
+    - path: "${SHARED_MODULES_PATH:-./shared/common_modules.yaml}"
+      prefix: common
+      
+    # Import from URL (future feature)
+    # - url: "https://github.com/org/repo/agents/utility_modules.yaml"
+    #   prefix: utils
+    
+  modules:
+    # Custom module with full configuration
+    - name: advanced_processor
+      type: custom
+      custom_class: "my_package.modules.AdvancedProcessor"
+      config:
+        model_endpoint: "${MODEL_ENDPOINT}"
+        api_key: "${API_KEY}"
+        retry_count: ${RETRY_COUNT:-3}
+        timeout_seconds: ${TIMEOUT:-30}
+        
+    # Module with vector store configuration
+    - name: semantic_search
+      type: retriever
+      vector_store:
+        # Unity Catalog configuration
+        catalog: "${VECTOR_CATALOG:-ml}"
+        schema: "${VECTOR_SCHEMA:-embeddings}"
+        index: "${VECTOR_INDEX:-semantic_index}"
+        
+        # Search parameters
+        k: ${TOP_K:-10}
+        
+        # Advanced options
+        embedding_model: "${EMBEDDING_MODEL:-databricks-bge-large-en}"
+        distance_metric: "${DISTANCE_METRIC:-cosine}"
+        
+        # Filters using SQL expressions
+        filter: "category = '${SEARCH_CATEGORY}' AND created_date >= '${START_DATE}'"
+        
+    # ReAct module with custom tools
+    - name: react_agent
+      type: react
+      signature: "task -> result, steps_taken"
+      tools:
+        - "calculator"
+        - "web_search"
+        - "database_query"
+            
+  workflow:
+    # Conditional step based on environment
+    - step: check_mode
+      module: advanced_processor
+      condition: "${ENABLE_ADVANCED_MODE:-false} == 'true'"
+      inputs:
+        mode: "${PROCESSING_MODE}"
+        config: {
+          "threshold": ${THRESHOLD:-0.8},
+          "max_iterations": ${MAX_ITER:-10}
+        }
+        
+    # Step with error handling
+    - step: search_knowledge
+      module: semantic_search
+      error_handler: "fallback_search"
+      inputs:
+        query: "$input.query"
+        num_results: ${NUM_RESULTS:-5}
+        
+    # Parallel execution group (future feature)
+    # - parallel_group: "analysis"
+    #   steps:
+    #     - step: analyze_sentiment
+    #       module: sentiment_analyzer
+    #     - step: extract_entities  
+    #       module: entity_extractor
+        
+    # Dynamic step selection based on input
+    - step: process_with_react
+      module: react_agent
+      condition: "$input.complexity == 'high'"
+      inputs:
+        task: "$input.query"
+        available_tools: "${AVAILABLE_TOOLS}"
+        
+  # Advanced deployment configuration
+  deployment:
+    # Environment-specific settings
+    catalog: "${DEPLOYMENT_CATALOG:-${ENVIRONMENT}_ml}"
+    schema: "${DEPLOYMENT_SCHEMA:-agents}"
+    model_name: "${MODEL_NAME:-${AGENT_NAME}_${ENVIRONMENT}}"
+    
+    # Conditional endpoint selection
+    serving_endpoint: "${SERVING_ENDPOINT:-${ENVIRONMENT}-${AGENT_NAME}}"
+    
+    # Resource configuration
+    compute_size: "${COMPUTE_SIZE:-Medium}"
+    
+    # Advanced serving options
+    scale_to_zero_enabled: ${SCALE_TO_ZERO:-true}
+    workload_size: "${WORKLOAD_SIZE:-Small}"
+    
+    # Environment variables to pass to deployment
+    environment_vars:
+      LOG_LEVEL: "${LOG_LEVEL:-INFO}"
+      ENABLE_TRACING: "${ENABLE_TRACING:-true}"
+      CACHE_TTL: "${CACHE_TTL:-3600}"
+      
+    # Rate limiting configuration
+    rate_limits:
+      requests_per_minute: ${RPM_LIMIT:-100}
+      requests_per_user: ${USER_LIMIT:-10}
+      burst_size: ${BURST_SIZE:-20}
+      
+    # A/B testing configuration (future feature)
+    # ab_testing:
+    #   enabled: ${ENABLE_AB_TESTING:-false}
+    #   traffic_percentage: ${AB_TRAFFIC_PCT:-10}
+    #   variant_endpoint: "${AB_VARIANT_ENDPOINT}"
+      
+  # Rich metadata with environment variables
+  metadata:
+    # Deployment metadata
+    environment: "${ENVIRONMENT:-development}"
+    region: "${DEPLOYMENT_REGION:-us-west-2}"
+    cost_center: "${COST_CENTER}"
+    
+    # Team information
+    team: "${TEAM_NAME}"
+    owner: "${OWNER_EMAIL}"
+    slack_alerts: "${SLACK_WEBHOOK}"
+    
+    # Feature flags
+    features:
+      enable_caching: ${ENABLE_CACHE:-true}
+      enable_logging: ${ENABLE_LOGGING:-true}
+      enable_metrics: ${ENABLE_METRICS:-true}
+      debug_mode: ${DEBUG_MODE:-false}
+      
+    # Service dependencies
+    dependencies:
+      - service: "vector-search"
+        endpoint: "${VECTOR_SEARCH_ENDPOINT}"
+        required: true
+        
+      - service: "model-serving"
+        endpoint: "${MODEL_SERVING_ENDPOINT}"
+        required: true
+        
+      - service: "feature-store"
+        endpoint: "${FEATURE_STORE_ENDPOINT}"
+        required: false
+        
+    # Tags for organization
+    tags:
+      - "${ENVIRONMENT}"
+      - "${PROJECT_NAME}"
+      - "ml-agent"
+      - "version-${AGENT_VERSION}"

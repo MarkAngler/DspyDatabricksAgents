@@ -1,0 +1,49 @@
+[project]
+name = "dspy-databricks-agents"
+version = "0.1.0"
+description = "Python package for creating and deploying DSPy-powered agentic workflows via YAML configuration on Databricks"
+authors = [{ name = "DSPy-Databricks Team" }]
+requires-python = "~=3.9"
+readme = "README.md"
+dependencies = [
+    "dspy-ai>=2.5.0,<3",
+    "mlflow>=2.18.0,<3",
+    "databricks-sdk>=0.20.0,<0.21",
+    "pydantic>=2.0.0,<3",
+    "pyyaml~=6.0",
+    "click~=8.0",
+    "rich~=13.0",
+    "dotenv>=0.9.9",
+    "pyjwt>=2.8.0,<3",
+    "cryptography>=42.0.0,<43",
+]
+
+[project.scripts]
+dspy-databricks = "dspy_databricks_agents.cli.main:cli"
+
+[dependency-groups]
+dev = [
+    "pytest~=7.0",
+    "pytest-cov~=4.0",
+    "pytest-mock~=3.0",
+    "pytest-asyncio>=0.21.0,<0.22",
+    "black~=23.0",
+    "ruff>=0.1.0,<0.2",
+    "mypy~=1.0",
+    "bandit~=1.7",
+    "safety~=3.0",
+]
+
+[tool.hatch.build.targets.sdist]
+include = ["src/dspy_databricks_agents"]
+
+[tool.hatch.build.targets.wheel]
+include = ["src/dspy_databricks_agents"]
+
+[tool.hatch.build.targets.wheel.sources]
+"src/dspy_databricks_agents" = "dspy_databricks_agents"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+

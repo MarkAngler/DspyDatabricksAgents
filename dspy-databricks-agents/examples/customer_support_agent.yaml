@@ -1,0 +1,91 @@
+# Customer Support Agent Example
+# This agent demonstrates a multi-stage workflow for handling customer queries
+# with intelligent routing, knowledge retrieval, and response generation.
+
+agent:
+  name: customer-support-agent
+  version: 1.0.0
+  description: Multi-stage customer support workflow with context-aware responses
+  
+  # DSPy configuration for language model and optimization
+  dspy:
+    lm_model: databricks-dbrx-instruct
+    temperature: 0.7
+    max_tokens: 1000
+    optimizer:
+      type: BootstrapFewShot
+      metric: answer_quality
+      num_candidates: 10
+  
+  # Agent modules/stages
+  modules:
+    # Step 1: Classify the intent and urgency of customer query
+    - name: intent_classifier
+      type: signature
+      signature: "customer_query -> intent, urgency, confidence"
+      
+    # Step 2: Retrieve relevant context from knowledge base
+    - name: context_retriever
+      type: retriever
+      vector_store:
+        catalog: ml
+        schema: support
+        index: knowledge_base
+        k: 5
+      
+    # Step 3: Generate appropriate response using chain of thought
+    - name: response_generator
+      type: chain_of_thought
+      signature: "query, context, intent, urgency -> response, next_steps"
+    
+    # Step 4: Validate response quality
+    - name: response_validator
+      type: signature
+      signature: "response, query -> is_appropriate, feedback"
+      
+  # Workflow definition with conditional logic
+  workflow:
+    # Always classify intent first
+    - step: classify_intent
+      module: intent_classifier
+      inputs:
+        customer_query: "$input.query"
+      
+    # Only retrieve context for non-general inquiries
+    - step: retrieve_context
+      module: context_retriever
+      condition: "$classify_intent.intent != 'general_inquiry'"
+      inputs:
+        query: "$input.query"
+        
+    # Generate response with all available information
+    - step: generate_response
+      module: response_generator
+      inputs:
+        query: "$input.query"
+        context: "$retrieve_context.documents"
+        intent: "$classify_intent.intent"
+        urgency: "$classify_intent.urgency"
+        
+    # Validate the response before sending
+    - step: validate_response
+      module: response_validator
+      inputs:
+        response: "$generate_response.response"
+        query: "$input.query"
+  
+  # Deployment configuration for Databricks
+  deployment:
+    catalog: ml
+    schema: agents
+    model_name: customer_support_agent_v1
+    serving_endpoint: prod-customer-support
+    compute_size: Small
+    auto_capture_inference_data: true
+    
+  # Additional metadata
+  metadata:
+    team: customer_experience
+    slack_channel: "#customer-support-alerts"
+    sla_response_time_ms: 1000
+    fallback_message: "I'm having trouble understanding your request. Let me connect you with a human agent."

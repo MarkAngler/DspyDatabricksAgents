@@ -1,0 +1,53 @@
+# Shared Common Modules
+# These modules can be imported and reused across multiple agents
+
+modules:
+  # Common text preprocessing module
+  - name: text_preprocessor
+    type: signature
+    signature: "raw_text -> cleaned_text, detected_language, text_stats"
+    
+  # Common sentiment analyzer
+  - name: sentiment_analyzer
+    type: signature
+    signature: "text -> sentiment, confidence, aspects"
+    
+  # Common entity extractor
+  - name: entity_extractor
+    type: chain_of_thought
+    signature: "text -> entities, entity_types, relationships"
+    
+  # Common summarizer
+  - name: text_summarizer
+    type: chain_of_thought
+    signature: "long_text, max_length -> summary, key_points"
+    
+  # Common classifier
+  - name: intent_classifier
+    type: signature
+    signature: "user_input -> intent, sub_intent, confidence"
+    
+  # Common fact validator
+  - name: fact_validator
+    type: signature
+    signature: "claim, evidence -> is_valid, confidence, explanation"
+    
+  # Common language detector
+  - name: language_detector
+    type: signature
+    signature: "text -> language, confidence, script"
+    
+  # Common profanity filter
+  - name: content_filter
+    type: signature
+    signature: "text -> is_appropriate, issues, filtered_text"
+    
+  # Common question decomposer
+  - name: question_decomposer
+    type: chain_of_thought
+    signature: "complex_question -> sub_questions, question_type, dependencies"
+    
+  # Common response formatter
+  - name: response_formatter
+    type: signature
+    signature: "raw_response, format_type -> formatted_response, metadata"

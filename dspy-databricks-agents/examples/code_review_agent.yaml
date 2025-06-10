@@ -1,0 +1,118 @@
+# Code Review Agent Example
+# This agent performs automated code review using ReAct pattern
+# with various code analysis tools and generates improvement suggestions.
+
+agent:
+  name: code-review-agent
+  version: 2.0.0
+  description: Automated code review with actionable suggestions and fixes
+  
+  dspy:
+    lm_model: databricks-mixtral-8x7b-instruct
+    temperature: 0.4
+    max_tokens: 2500
+    optimizer:
+      type: BootstrapFewShotWithRandomSearch
+      metric: review_quality
+      num_candidates: 15
+      
+  modules:
+    # Step 1: Analyze code structure and complexity
+    - name: code_analyzer
+      type: react
+      signature: "code, file_path, language -> issues, metrics"
+      tools:
+        - ast_parser        # Parse abstract syntax tree
+        - complexity_checker # Check cyclomatic complexity
+        - style_checker     # Check code style violations
+        - security_scanner  # Scan for security vulnerabilities
+        
+    # Step 2: Identify code smells and anti-patterns
+    - name: pattern_detector
+      type: chain_of_thought
+      signature: "code, language, metrics -> code_smells, anti_patterns, severity"
+      
+    # Step 3: Generate improvement suggestions
+    - name: suggestion_generator
+      type: chain_of_thought
+      signature: "code, issues, code_smells -> suggestions, priority, impact"
+      
+    # Step 4: Generate fixed code
+    - name: code_fixer
+      type: signature
+      signature: "original_code, suggestions -> fixed_code, changes_made"
+      
+    # Step 5: Create review summary
+    - name: review_summarizer
+      type: signature
+      signature: "issues, suggestions, severity -> summary, action_items, estimated_effort"
+      
+  workflow:
+    # Analyze the submitted code
+    - step: analyze_code
+      module: code_analyzer
+      inputs:
+        code: "$input.code"
+        file_path: "$input.file_path"
+        language: "$input.language"
+        
+    # Detect patterns only if issues found
+    - step: detect_patterns
+      module: pattern_detector
+      condition: "$analyze_code.issues.length > 0"
+      inputs:
+        code: "$input.code"
+        language: "$input.language"
+        metrics: "$analyze_code.metrics"
+        
+    # Generate suggestions for improvement
+    - step: generate_suggestions
+      module: suggestion_generator
+      inputs:
+        code: "$input.code"
+        issues: "$analyze_code.issues"
+        code_smells: "$detect_patterns.code_smells"
+        
+    # Attempt to fix critical issues
+    - step: fix_code
+      module: code_fixer
+      condition: "$generate_suggestions.priority == 'high'"
+      inputs:
+        original_code: "$input.code"
+        suggestions: "$generate_suggestions.suggestions"
+        
+    # Summarize the review
+    - step: summarize_review
+      module: review_summarizer
+      inputs:
+        issues: "$analyze_code.issues"
+        suggestions: "$generate_suggestions.suggestions"
+        severity: "$detect_patterns.severity"
+        
+  deployment:
+    catalog: engineering
+    schema: dev_tools
+    model_name: code_reviewer_v2
+    serving_endpoint: code-review-api
+    compute_size: Medium
+    rate_limits:
+      requests_per_minute: 100
+      max_code_size_kb: 500
+      
+  metadata:
+    supported_languages:
+      - python
+      - javascript
+      - typescript
+      - java
+      - scala
+      - sql
+    review_aspects:
+      - correctness
+      - performance
+      - security
+      - maintainability
+      - best_practices
+    integration:
+      github_app_id: "${GITHUB_APP_ID}"
+      gitlab_webhook: "${GITLAB_WEBHOOK_URL}"

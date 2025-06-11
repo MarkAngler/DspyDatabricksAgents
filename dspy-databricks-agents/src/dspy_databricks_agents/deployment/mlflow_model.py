@@ -29,7 +29,7 @@ class DSPyAgentModel(mlflow.pyfunc.PythonModel):
         self.config_path = config_path
         self.agent = None
 
-    def load_context(self, context):
+    def load_context(self, context: mlflow.pyfunc.PythonModelContext) -> None:
         """Load model artifacts and initialize agent.
 
         Args:
@@ -63,12 +63,18 @@ class DSPyAgentModel(mlflow.pyfunc.PythonModel):
             logger.error(f"Failed to load agent: {str(e)}")
             raise
 
-    def predict(self, context, model_input):
+    def predict(
+        self,
+        context: mlflow.pyfunc.PythonModelContext,
+        model_input: Any,
+        params: Optional[Dict[str, Any]] = None,
+    ) -> Dict[str, Any]:
         """Process chat messages and return response.
 
         Args:
             context: MLflow context
             model_input: Input data containing messages
+            params: Optional parameters for prediction
 
         Returns:
             Dictionary with chat response

@@ -65,6 +65,11 @@ class DSPyDatabricksAgent(ChatAgent):
     def __init__(self, config: AgentConfig):
         """Initialize agent from configuration."""
         self.config = config
+        
+        # Ensure MLflow experiment is set to avoid default experiment warning
+        from dspy_databricks_agents.deployment.mlflow_utils import ensure_experiment_set
+        ensure_experiment_set(agent_name=config.name)
+        
         self.modules = self._build_modules()
         self.orchestrator = WorkflowOrchestrator(self.modules)
         self._initialize_dspy()

@@ -16,6 +16,7 @@ from dspy_databricks_agents.config.parser import YAMLParser
 from dspy_databricks_agents.config.schema import AgentConfig
 from dspy_databricks_agents.core.agent import Agent
 from dspy_databricks_agents.deployment.databricks_deployer import DatabricksDeployer
+from dspy_databricks_agents.deployment.mlflow_utils import set_experiment_with_environment
 
 from dotenv import load_dotenv
 import os
@@ -223,6 +224,16 @@ def test(agent_name: str, query: str, endpoint: Optional[str],
     try:
         if local:
             console.print(f"[blue]Loading local agent from {local}...[/blue]")
+            
+            # Set MLflow experiment to avoid default experiment warning
+            parser = YAMLParser()
+            config = parser.parse_file(local)
+            set_experiment_with_environment(
+                base_name=config.name,
+                environment="local_test",
+                project_prefix="dspy_cli"
+            )
+            
             agent = Agent.from_yaml(local)
             
             console.print(f"\n[bold]Query:[/bold] {query}")

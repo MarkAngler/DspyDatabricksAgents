@@ -17,7 +17,7 @@ from dspy_databricks_agents.deployment.mlflow_model import DSPyAgentModel
 class DSPyAgentModelWrapper(mlflow.pyfunc.PythonModel):
     """Wrapper for DSPy Agent Model that handles MLflow integration."""
     
-    def load_context(self, context):
+    def load_context(self, context: mlflow.pyfunc.PythonModelContext) -> None:
         """Load model artifacts and initialize agent.
         
         Args:
@@ -39,12 +39,18 @@ class DSPyAgentModelWrapper(mlflow.pyfunc.PythonModel):
         # Initialize it with context
         self.model.load_context(context)
     
-    def predict(self, context, model_input):
+    def predict(
+        self,
+        context: mlflow.pyfunc.PythonModelContext,
+        model_input: Any,
+        params: Optional[Dict[str, Any]] = None,
+    ) -> Dict[str, Any]:
         """Process chat messages and return response.
         
         Args:
             context: MLflow context
             model_input: Input data containing messages
+            params: Optional parameters for prediction
             
         Returns:
             Dictionary with chat response

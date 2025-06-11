@@ -1,0 +1,149 @@
+# RAG Research Agent Example - Databricks Foundation Models
+# This agent demonstrates retrieval-augmented generation for research tasks
+# using actual Databricks Foundation Models
+
+agent:
+  name: research-assistant-agent
+  version: 1.2.0
+  description: Multi-source RAG agent for comprehensive research with citations
+  
+  dspy:
+    # Use actual Databricks Foundation Model
+    # Available models: databricks-meta-llama-3-1-70b-instruct, databricks-meta-llama-3-1-405b-instruct, etc.
+    lm_model: databricks/databricks-meta-llama-3-3-70b-instruct
+    temperature: 0.5
+    max_tokens: 3000
+    optimizer:
+      type: BootstrapFewShot
+      metric: factual_accuracy
+      num_candidates: 25
+      
+  modules:
+    # Step 1: Decompose research query
+    - name: query_decomposer
+      type: signature
+      signature: "research_question -> sub_queries, search_strategy, required_sources"
+      
+    # Step 2: Retrieve from internal knowledge base
+    - name: internal_retriever
+      type: retriever
+      vector_store:
+        catalog: research
+        schema: knowledge
+        index: internal_docs
+        k: 10
+        
+    # Step 3: Retrieve from external sources
+    - name: external_retriever
+      type: retriever
+      vector_store:
+        catalog: research
+        schema: external
+        index: web_crawl_data
+        k: 8
+        
+    # Step 4: Retrieve from academic papers
+    - name: academic_retriever
+      type: retriever
+      vector_store:
+        catalog: research
+        schema: academic
+        index: papers_arxiv
+        k: 5
+        
+    # Step 5: Synthesize information
+    - name: information_synthesizer
+      type: chain_of_thought
+      signature: "question, internal_docs, external_docs, papers -> synthesis, key_points, contradictions"
+      
+    # Step 6: Fact check and verify
+    - name: fact_checker
+      type: chain_of_thought
+      signature: "synthesis, sources -> verified_facts, confidence_scores, disputed_claims"
+      
+    # Step 7: Generate comprehensive response
+    - name: response_generator
+      type: chain_of_thought
+      signature: "question, synthesis, verified_facts -> response, citations, further_reading"
+      
+  workflow:
+    # Decompose the research question
+    - step: decompose_query
+      module: query_decomposer
+      inputs:
+        research_question: "$input.query"
+        
+    # Retrieve from internal knowledge base
+    - step: retrieve_internal
+      module: internal_retriever
+      inputs:
+        query: "$input.query"
+        sub_queries: "$decompose_query.sub_queries"
+        
+    # Retrieve from external sources if needed
+    - step: retrieve_external
+      module: external_retriever
+      condition: "'external' in $decompose_query.required_sources"
+      inputs:
+        query: "$input.query"
+        sub_queries: "$decompose_query.sub_queries"
+        
+    # Retrieve academic papers for research topics
+    - step: retrieve_academic
+      module: academic_retriever
+      condition: "'academic' in $decompose_query.required_sources"
+      inputs:
+        query: "$input.query"
+        search_strategy: "$decompose_query.search_strategy"
+        
+    # Synthesize all retrieved information
+    - step: synthesize_information
+      module: information_synthesizer
+      inputs:
+        question: "$input.query"
+        internal_docs: "$retrieve_internal.documents"
+        external_docs: "$retrieve_external.documents"
+        papers: "$retrieve_academic.documents"
+        
+    # Fact-check the synthesis
+    - step: check_facts
+      module: fact_checker
+      inputs:
+        synthesis: "$synthesize_information.synthesis"
+        sources: {
+          internal: "$retrieve_internal.documents",
+          external: "$retrieve_external.documents",
+          academic: "$retrieve_academic.documents"
+        }
+        
+    # Generate final response with citations
+    - step: generate_response
+      module: response_generator
+      inputs:
+        question: "$input.query"
+        synthesis: "$synthesize_information.synthesis"
+        verified_facts: "$check_facts.verified_facts"
+        
+  deployment:
+    catalog: workspace
+    schema: default
+    model_name: rag_research_assistant
+    serving_endpoint: research-assistant-api
+    compute_size: Large
+    vector_search_config:
+      embedding_model: databricks-bge-large-en
+      chunk_size: 512
+      chunk_overlap: 50
+      
+  metadata:
+    source_weights:
+      internal: 0.4
+      external: 0.3
+      academic: 0.3
+    citation_format: APA
+    max_sources_per_response: 20
+    supported_domains:
+      - technology
+      - science
+      - business
+      - healthcare

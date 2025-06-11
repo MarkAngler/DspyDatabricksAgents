@@ -1,0 +1,33 @@
+# Simple Test Agent for Databricks Foundation Models
+# This agent uses actual Databricks LLMs without requiring vector stores
+
+agent:
+  name: simple-databricks-test-agent
+  version: 1.0.0
+  description: Simple agent to test Databricks Foundation Model integration
+  
+  dspy:
+    # Use actual Databricks Foundation Model
+    lm_model: databricks/databricks-meta-llama-3-3-70b-instruct
+    temperature: 0.7
+    max_tokens: 1000
+      
+  modules:
+    # Simple chain of thought module
+    - name: responder
+      type: chain_of_thought
+      signature: "question -> reasoning, answer"
+      
+  workflow:
+    # Single step workflow
+    - step: respond
+      module: responder
+      inputs:
+        question: "$input.query"
+        
+  deployment:
+    catalog: workspace
+    schema: default
+    model_name: simple_databricks_test
+    serving_endpoint: simple-test-api
+    compute_size: Small

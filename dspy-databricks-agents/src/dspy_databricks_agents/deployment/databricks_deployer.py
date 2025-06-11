@@ -186,9 +186,18 @@ class DatabricksDeployer:
         import mlflow
         import shutil
         from dspy_databricks_agents.deployment.model_signature import get_signature_for_config
+        from dspy_databricks_agents.deployment.mlflow_utils import set_experiment_with_environment
 
         # Configure MLflow to use Unity Catalog
         mlflow.set_registry_uri("databricks-uc")
+        
+        # Set up MLflow experiment to avoid default experiment warning
+        environment = catalog.split("_")[0] if "_" in catalog else "prod"
+        set_experiment_with_environment(
+            base_name=config.name,
+            environment=environment,
+            project_prefix="databricks"
+        )
 
         # Create temporary directory for model artifacts
         with tempfile.TemporaryDirectory() as temp_dir:

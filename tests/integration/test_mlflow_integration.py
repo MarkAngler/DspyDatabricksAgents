@@ -15,16 +15,16 @@ from mlflow.types.agent import (
     ChatContext,
 )
 
-from dspy_databricks_agents.config.schema import (
+from config.schema import (
     AgentConfig,
     DSPyConfig,
     ModuleConfig,
     ModuleType,
     WorkflowStep,
 )
-from dspy_databricks_agents.core.agent import Agent, DSPyDatabricksAgent
-from dspy_databricks_agents.deployment.mlflow_model import DSPyAgentModel
-from dspy_databricks_agents.deployment.model_signature import (
+from core.agent import Agent, DSPyDatabricksAgent
+from deployment.mlflow_model import DSPyAgentModel
+from deployment.model_signature import (
     create_chat_model_signature,
     create_tool_enabled_signature,
     get_signature_for_config,

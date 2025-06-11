@@ -3,7 +3,7 @@
 import pytest
 from pydantic import ValidationError
 
-from dspy_databricks_agents.config.schema import (
+from config.schema import (
     AgentConfig,
     DSPyConfig,
     ModuleConfig,

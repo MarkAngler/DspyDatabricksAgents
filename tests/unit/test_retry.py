@@ -3,13 +3,13 @@
 import pytest
 import time
 from unittest.mock import Mock, patch, call
-from dspy_databricks_agents.resilience import (
+from resilience import (
     RetryConfig,
     retry_with_backoff,
     RetryExhausted,
     RetryableOperation
 )
-from dspy_databricks_agents.resilience.retry import calculate_backoff_delay
+from resilience.retry import calculate_backoff_delay
 
 
 class TestRetryLogic:

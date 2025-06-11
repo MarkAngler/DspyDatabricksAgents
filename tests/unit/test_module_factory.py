@@ -4,7 +4,7 @@ import pytest
 from unittest.mock import Mock, patch
 import dspy
 
-from dspy_databricks_agents.core.modules import (
+from core.modules import (
     ModuleFactory,
     ModuleRegistry,
     BaseModule,
@@ -13,8 +13,8 @@ from dspy_databricks_agents.core.modules import (
     ReActModule,
     DatabricksRetriever,
 )
-from dspy_databricks_agents.core.tools import ToolRegistry
-from dspy_databricks_agents.config.schema import (
+from core.tools import ToolRegistry
+from config.schema import (
     ModuleConfig,
     ModuleType,
     VectorStoreConfig,

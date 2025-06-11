@@ -12,11 +12,11 @@ from rich.console import Console
 from rich.syntax import Syntax
 from rich.table import Table
 
-from dspy_databricks_agents.config.parser import YAMLParser
-from dspy_databricks_agents.config.schema import AgentConfig
-from dspy_databricks_agents.core.agent import Agent
-from dspy_databricks_agents.deployment.databricks_deployer import DatabricksDeployer
-from dspy_databricks_agents.deployment.mlflow_utils import set_experiment_with_environment
+from config.parser import YAMLParser
+from config.schema import AgentConfig
+from core.agent import Agent
+from deployment.databricks_deployer import DatabricksDeployer
+from deployment.mlflow_utils import set_experiment_with_environment
 
 from dotenv import load_dotenv
 import os

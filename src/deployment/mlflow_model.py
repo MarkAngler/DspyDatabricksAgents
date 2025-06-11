@@ -9,8 +9,8 @@ import mlflow
 import pandas as pd
 from mlflow.types.agent import ChatAgentMessage, ChatAgentResponse
 
-from dspy_databricks_agents.config.schema import AgentConfig
-from dspy_databricks_agents.core.agent import Agent
+from config.schema import AgentConfig
+from core.agent import Agent
 
 # Set up logging
 logging.basicConfig(level=logging.INFO)

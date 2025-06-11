@@ -6,8 +6,8 @@ from typing import Dict, Optional, Type
 import dspy
 from databricks.sdk import WorkspaceClient
 
-from dspy_databricks_agents.config.schema import ModuleConfig, ModuleType, VectorStoreConfig
-from dspy_databricks_agents.core.tools import ToolRegistry
+from config.schema import ModuleConfig, ModuleType, VectorStoreConfig
+from core.tools import ToolRegistry
 
 
 class ModuleRegistry:

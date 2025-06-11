@@ -323,8 +323,8 @@ class DashboardIntegration:
 
 # COMMAND ----------
 
-from dspy_databricks_agents.monitoring import DashboardIntegration
-from dspy_databricks_agents.deployment import DatabricksDeployer
+from monitoring import DashboardIntegration
+from deployment import DatabricksDeployer
 import pandas as pd
 import matplotlib.pyplot as plt
 from datetime import datetime, timedelta
@@ -468,7 +468,7 @@ plt.show()
 # COMMAND ----------
 
 # Configure alerts
-from dspy_databricks_agents.monitoring import ErrorPattern, ErrorSeverity
+from monitoring import ErrorPattern, ErrorSeverity
 
 # High latency alert
 def latency_alert(errors):

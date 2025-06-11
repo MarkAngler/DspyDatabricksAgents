@@ -1,7 +1,7 @@
 """Unit tests for tool registry and implementations."""
 
 import pytest
-from dspy_databricks_agents.core.tools import ToolRegistry
+from core.tools import ToolRegistry
 
 
 class TestToolRegistry:

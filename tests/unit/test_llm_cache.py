@@ -6,13 +6,13 @@ import os
 import tempfile
 import shutil
 from unittest.mock import Mock, patch
-from dspy_databricks_agents.cache import (
+from cache import (
     LLMCache,
     CacheConfig,
     CacheEntry,
     generate_cache_key
 )
-from dspy_databricks_agents.cache.llm_cache import cached_llm_call
+from cache.llm_cache import cached_llm_call
 
 
 class TestCacheKeyGeneration:

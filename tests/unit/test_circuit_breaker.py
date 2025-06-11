@@ -3,13 +3,13 @@
 import pytest
 import time
 from unittest.mock import Mock, patch
-from dspy_databricks_agents.resilience import (
+from resilience import (
     CircuitBreaker, 
     CircuitBreakerError, 
     CircuitState,
     circuit_breaker
 )
-from dspy_databricks_agents.resilience.circuit_breaker import CircuitBreakerConfig
+from resilience.circuit_breaker import CircuitBreakerConfig
 
 
 class TestCircuitBreaker:

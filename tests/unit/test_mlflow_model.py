@@ -7,14 +7,14 @@ from unittest.mock import Mock, patch, MagicMock
 
 import pytest
 
-from dspy_databricks_agents.config.schema import (
+from config.schema import (
     AgentConfig,
     DSPyConfig,
     ModuleConfig,
     ModuleType,
     WorkflowStep,
 )
-from dspy_databricks_agents.deployment.mlflow_model import DSPyAgentModel
+from deployment.mlflow_model import DSPyAgentModel
 
 
 class TestDSPyAgentModel:
@@ -193,7 +193,7 @@ class TestDSPyAgentModel:
     def test_load_pyfunc(self, tmp_path, agent_config):
         """Test the _load_pyfunc entry point."""
         # Import the module to get access to _load_pyfunc
-        from dspy_databricks_agents.deployment import mlflow_model
+        from deployment import mlflow_model
         
         # Create config
         config_dir = tmp_path / "config"

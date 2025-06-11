@@ -10,8 +10,8 @@ This example shows how to use the monitoring-aware deployer to:
 import os
 from pathlib import Path
 
-from dspy_databricks_agents.config.parser import YamlConfigParser
-from dspy_databricks_agents.deployment import DatabricksDeployerWithMonitoring
+from config.parser import YamlConfigParser
+from deployment import DatabricksDeployerWithMonitoring
 
 
 def main():

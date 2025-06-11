@@ -6,7 +6,7 @@ from datetime import datetime, timezone
 
 import pytest
 
-from dspy_databricks_agents.config.schema import (
+from config.schema import (
     AgentConfig,
     DSPyConfig,
     ModuleConfig,
@@ -14,7 +14,7 @@ from dspy_databricks_agents.config.schema import (
     WorkflowStep,
     DeploymentConfig,
 )
-from dspy_databricks_agents.deployment import DatabricksDeployerWithMonitoring
+from deployment import DatabricksDeployerWithMonitoring
 
 
 class TestDatabricksDeployerWithMonitoring:

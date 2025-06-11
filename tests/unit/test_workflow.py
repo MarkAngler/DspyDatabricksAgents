@@ -6,8 +6,8 @@ from unittest.mock import AsyncMock, Mock, patch
 
 import pytest
 
-from dspy_databricks_agents.config.schema import WorkflowStep
-from dspy_databricks_agents.core.workflow import (
+from config.schema import WorkflowStep
+from core.workflow import (
     ConditionEvaluator,
     WorkflowContext,
     WorkflowOrchestrator,

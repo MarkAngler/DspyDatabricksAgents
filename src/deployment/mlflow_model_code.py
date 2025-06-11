@@ -9,9 +9,9 @@ import mlflow
 from mlflow.types.agent import ChatAgentMessage, ChatAgentResponse
 
 # Import the necessary modules
-from dspy_databricks_agents.config.schema import AgentConfig
-from dspy_databricks_agents.core.agent import Agent
-from dspy_databricks_agents.deployment.mlflow_model import DSPyAgentModel
+from config.schema import AgentConfig
+from core.agent import Agent
+from deployment.mlflow_model import DSPyAgentModel
 
 
 class DSPyAgentModelWrapper(mlflow.pyfunc.PythonModel):

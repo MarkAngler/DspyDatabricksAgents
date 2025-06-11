@@ -16,11 +16,11 @@ from mlflow.types.agent import (
     ToolCall,
 )
 
-from dspy_databricks_agents.config.parser import YAMLParser
-from dspy_databricks_agents.config.schema import AgentConfig
-from dspy_databricks_agents.core.modules import ModuleFactory
-from dspy_databricks_agents.core.workflow import WorkflowOrchestrator
-from dspy_databricks_agents.core.tools import ToolRegistry
+from config.parser import YAMLParser
+from config.schema import AgentConfig
+from core.modules import ModuleFactory
+from core.workflow import WorkflowOrchestrator
+from core.tools import ToolRegistry
 
 # Configure logging
 logger = logging.getLogger(__name__)
@@ -68,7 +68,7 @@ class DSPyDatabricksAgent(ChatAgent):
         self.config = config
 
         # Ensure MLflow experiment is set to avoid default experiment warning
-        from dspy_databricks_agents.deployment.mlflow_utils import ensure_experiment_set
+        from deployment.mlflow_utils import ensure_experiment_set
 
         ensure_experiment_set(agent_name=config.name)
 
@@ -242,7 +242,7 @@ class DSPyDatabricksAgent(ChatAgent):
         final_step = self.config.workflow[-1]
 
         # Initialize context object
-        from dspy_databricks_agents.core.workflow import WorkflowContext
+        from core.workflow import WorkflowContext
 
         context_obj = WorkflowContext(workflow_input)
 

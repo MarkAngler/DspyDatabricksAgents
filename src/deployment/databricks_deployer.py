@@ -8,8 +8,8 @@ from typing import Any, Dict, Optional, List
 from datetime import datetime, timezone
 import time
 
-from dspy_databricks_agents.config.schema import AgentConfig
-from dspy_databricks_agents.core.agent import Agent
+from config.schema import AgentConfig
+from core.agent import Agent
 
 
 class DatabricksDeployer:
@@ -185,8 +185,8 @@ class DatabricksDeployer:
         """
         import mlflow
         import shutil
-        from dspy_databricks_agents.deployment.model_signature import get_signature_for_config
-        from dspy_databricks_agents.deployment.mlflow_utils import set_experiment_with_environment
+        from deployment.model_signature import get_signature_for_config
+        from deployment.mlflow_utils import set_experiment_with_environment
 
         # Configure MLflow to use Unity Catalog
         mlflow.set_registry_uri("databricks-uc")

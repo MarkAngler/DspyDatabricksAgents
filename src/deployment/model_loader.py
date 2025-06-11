@@ -26,7 +26,7 @@ def _load_pyfunc(data_path):
         Model instance
     """
     # Import here to ensure all dependencies are available
-    from dspy_databricks_agents.deployment.mlflow_model import DSPyAgentModel
+    from deployment.mlflow_model import DSPyAgentModel
     
     # Look for config in the data directory
     config_path = Path(data_path) / "agent_config.json"

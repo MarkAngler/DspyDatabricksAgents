@@ -5,7 +5,7 @@ import re
 from concurrent.futures import ThreadPoolExecutor
 from typing import Any, Dict, List, Optional
 
-from dspy_databricks_agents.config.schema import WorkflowStep
+from config.schema import WorkflowStep
 
 
 class WorkflowContext:

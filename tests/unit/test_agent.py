@@ -8,14 +8,14 @@ from unittest.mock import AsyncMock, Mock, patch
 import pytest
 from mlflow.types.agent import ChatAgentMessage, ChatAgentResponse, ChatContext
 
-from dspy_databricks_agents.config.schema import (
+from config.schema import (
     AgentConfig,
     DSPyConfig,
     ModuleConfig,
     ModuleType,
     WorkflowStep,
 )
-from dspy_databricks_agents.core.agent import Agent, DSPyDatabricksAgent
+from core.agent import Agent, DSPyDatabricksAgent
 
 
 class TestAgent:

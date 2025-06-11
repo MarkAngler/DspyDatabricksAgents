@@ -7,7 +7,7 @@ from unittest.mock import Mock, patch
 
 import pytest
 
-from dspy_databricks_agents.deployment.model_loader import (
+from deployment.model_loader import (
     _load_pyfunc,
     _load_model,
     DSPyAgentModelWrapper,

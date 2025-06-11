@@ -9,16 +9,16 @@ from datetime import datetime, timezone, timedelta
 import time
 import warnings
 
-from dspy_databricks_agents.config.schema import AgentConfig
-from dspy_databricks_agents.core.agent import Agent
-from dspy_databricks_agents.deployment.model_signature import get_signature_for_config
-from dspy_databricks_agents.monitoring import (
+from config.schema import AgentConfig
+from core.agent import Agent
+from deployment.model_signature import get_signature_for_config
+from monitoring import (
     HealthCheckManager,
     MetricsCollector,
     ErrorTracker,
     DashboardIntegration
 )
-from dspy_databricks_agents.monitoring.error_tracker import ErrorSeverity
+from monitoring.error_tracker import ErrorSeverity
 
 # Import the original DatabricksDeployer
 from .databricks_deployer import DatabricksDeployer as OriginalDatabricksDeployer
@@ -230,7 +230,7 @@ class DatabricksDeployer(OriginalDatabricksDeployer):
             
             # Configure custom alert patterns if thresholds provided
             if alert_thresholds:
-                from dspy_databricks_agents.monitoring.error_tracker import ErrorPattern
+                from monitoring.error_tracker import ErrorPattern
                 
                 # High latency alert
                 if "latency_p99_threshold_ms" in alert_thresholds:

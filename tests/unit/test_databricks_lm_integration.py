@@ -5,8 +5,8 @@ import pytest
 from unittest.mock import patch, MagicMock
 import dspy
 
-from dspy_databricks_agents.config.schema import AgentConfig, DSPyConfig
-from dspy_databricks_agents.core.agent import DSPyDatabricksAgent
+from config.schema import AgentConfig, DSPyConfig
+from core.agent import DSPyDatabricksAgent
 
 
 class TestDatabricksLMIntegration:

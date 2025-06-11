@@ -3,7 +3,7 @@
 import pytest
 import time
 from unittest.mock import Mock, patch
-from dspy_databricks_agents.security import (
+from security import (
     AuthConfig,
     AuthMiddleware,
     TokenValidator,
@@ -16,11 +16,11 @@ from dspy_databricks_agents.security import (
     AuditLogger,
     AuditEvent
 )
-from dspy_databricks_agents.security.auth import (
+from security.auth import (
     AuthenticationError,
     AuthorizationError
 )
-from dspy_databricks_agents.security.audit import AuditEventType
+from security.audit import AuditEventType
 
 
 class TestAuthentication:

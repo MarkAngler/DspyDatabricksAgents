@@ -5,8 +5,8 @@ from pathlib import Path
 
 import pytest
 
-from dspy_databricks_agents.config.parser import YAMLParser
-from dspy_databricks_agents.core.agent import Agent
+from config.parser import YAMLParser
+from core.agent import Agent
 
 
 class TestExampleConfigurations:

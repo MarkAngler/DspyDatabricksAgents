@@ -7,8 +7,8 @@ from unittest.mock import Mock, patch
 import pytest
 from click.testing import CliRunner
 
-from dspy_databricks_agents.cli.main import cli
-from dspy_databricks_agents.config.schema import (
+from cli.main import cli
+from config.schema import (
     AgentConfig,
     DeploymentConfig,
     DSPyConfig,

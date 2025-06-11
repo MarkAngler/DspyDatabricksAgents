@@ -8,7 +8,7 @@ from typing import Any, Dict, Set
 import yaml
 from pydantic import ValidationError
 
-from dspy_databricks_agents.config.schema import AgentConfig
+from config.schema import AgentConfig
 
 
 class YAMLParser:

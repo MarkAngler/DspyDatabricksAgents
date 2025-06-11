@@ -5,15 +5,15 @@ from unittest.mock import Mock, patch, MagicMock
 from datetime import datetime, timedelta
 import json
 
-from dspy_databricks_agents.monitoring import (
+from monitoring import (
     HealthCheckManager,
     MetricsCollector,
     ErrorTracker,
     DashboardIntegration,
 )
-from dspy_databricks_agents.monitoring.health_check import HealthStatus, ComponentHealth
-from dspy_databricks_agents.monitoring.error_tracker import ErrorSeverity, ErrorEvent, ErrorPattern
-from dspy_databricks_agents.monitoring.metrics import MetricPoint, MetricSummary
+from monitoring.health_check import HealthStatus, ComponentHealth
+from monitoring.error_tracker import ErrorSeverity, ErrorEvent, ErrorPattern
+from monitoring.metrics import MetricPoint, MetricSummary
 
 
 class TestHealthCheckManager:

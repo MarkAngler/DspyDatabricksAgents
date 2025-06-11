@@ -3,7 +3,8 @@ envs
 mlruns/
 test_mlruns/
 test_mlruns*/
-
+docs/
+claude-sparc.sh
 # Python
 *.pyc
 __pycache__/
@@ -60,3 +61,11 @@ Thumbs.db
 # Logs
 *.log
 logs/
+.mcp.json
+change_permissions.sh
+.roo/mcp.json
+uv.lock
+CLAUDE.local.md
+claude-sparc.md
+.gitignore
+.gitignore

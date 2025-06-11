@@ -111,8 +111,88 @@ class DSPyDatabricksAgent(ChatAgent):
                 def forward(self, prompt=None, messages=None, **kwargs):
                     """Handle model inference."""
                     # For deployment, return minimal mock responses
-                    # DSPy expects a list of string responses from forward()
-                    return ["Mock response for deployment"]
+                    # DSPy expects a response object with choices, usage, and model attributes
+                    from types import SimpleNamespace
+                    import json
+                    import re
+                    
+                    # Extract expected output fields from the prompt/messages
+                    expected_fields = []
+                    content = ""
+                    
+                    if messages:
+                        # Extract content from messages
+                        for msg in messages:
+                            if isinstance(msg, dict) and 'content' in msg:
+                                content += msg['content'] + "\n"
+                    elif prompt:
+                        content = prompt
+                    
+                    # Look for output fields in DSPy's format
+                    # DSPy shows output fields like: "Your output fields are:\n1. `field_name` (type):"
+                    output_fields = []
+                    if "Your output fields are:" in content:
+                        # Extract output field names
+                        output_pattern = r'`(\w+)`\s*\([^)]+\):'
+                        output_matches = re.findall(output_pattern, content)
+                        output_fields.extend(output_matches)
+                    
+                    # Also look for JSON structure hints
+                    if "Outputs will be a JSON object" in content:
+                        json_pattern = r'"(\w+)":\s*"?\{?\w+\}?"?'
+                        json_matches = re.findall(json_pattern, content)
+                        output_fields.extend(json_matches)
+                    
+                    # Remove duplicates and use the found fields
+                    output_fields = list(set(output_fields))
+                    
+                    # Always generate exactly the fields that are expected
+                    if output_fields:
+                        # Generic response based on detected output fields
+                        mock_response_json = {}
+                        for field in output_fields:
+                            field_lower = field.lower()
+                            if 'reasoning' in field_lower:
+                                mock_response_json[field] = "Mock reasoning: Let's think step by step..."
+                            elif 'query' in field_lower or 'question' in field_lower:
+                                mock_response_json[field] = "Mock query"
+                            elif 'response' in field_lower or 'answer' in field_lower:
+                                mock_response_json[field] = "Mock response"
+                            elif field_lower.endswith('s') or 'list' in field_lower:  # Likely a list
+                                mock_response_json[field] = [f"Mock {field} 1", f"Mock {field} 2"]
+                            elif 'score' in field_lower:
+                                mock_response_json[field] = 0.95
+                            else:
+                                mock_response_json[field] = f"Mock {field}"
+                    else:
+                        # Fallback generic response
+                        mock_response_json = {
+                            "response": "Mock response for testing purposes",
+                            "answer": "Mock answer"
+                        }
+                    
+                    mock_text = json.dumps(mock_response_json)
+                    
+                    mock_choice = SimpleNamespace(
+                        message=SimpleNamespace(content=mock_text),
+                        text=mock_text
+                    )
+                    
+                    # Create usage statistics as a dict
+                    mock_usage = {
+                        "prompt_tokens": 10,
+                        "completion_tokens": 5,
+                        "total_tokens": 15
+                    }
+                    
+                    mock_response = SimpleNamespace(
+                        choices=[mock_choice],
+                        usage=mock_usage,
+                        model=self.model,
+                        _hidden_params={}  # For cost tracking
+                    )
+                    
+                    return mock_response
                     
                 # Let BaseLM handle __call__
                 

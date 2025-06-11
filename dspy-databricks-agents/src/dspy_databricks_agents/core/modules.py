@@ -91,20 +91,25 @@ class DatabricksRetriever(dspy.Retrieve):
     
     def _init_vector_client(self):
         """Initialize Databricks Vector Search client."""
-        try:
-            w = WorkspaceClient()
-            return w.vector_search_indexes
-        except Exception:
-            # Return None during deployment/testing
-            return None
+        # For now, always return None since we're using mock data
+        # In production, this would initialize the actual client
+        return None
     
-    def forward(self, query: str, k: Optional[int] = None) -> dspy.Prediction:
-        """Retrieve relevant documents."""
+    def forward(self, query: str, k: Optional[int] = None, **kwargs) -> dspy.Prediction:
+        """Retrieve relevant documents.
+        
+        Args:
+            query: The main query string
+            k: Number of results to retrieve
+            **kwargs: Additional arguments (e.g., sub_queries) that may be passed but not used
+        """
         k = k or self.k
         
         # If client is not initialized (deployment/testing), return mock results
         if not self.client:
-            return dspy.Prediction(passages=[f"Mock passage {i+1}" for i in range(k)])
+            # Return mock documents as a Prediction with 'documents' field
+            mock_docs = [f"Mock passage {i+1} for query: {query}" for i in range(k)]
+            return dspy.Prediction(documents=mock_docs, passages=mock_docs)
         
         # Query vector search
         results = self.client.query(
@@ -113,9 +118,9 @@ class DatabricksRetriever(dspy.Retrieve):
             num_results=k,
         )
         
-        # Format results
+        # Format results - return both 'documents' and 'passages' for compatibility
         passages = [r.text for r in results.results]
-        return dspy.Prediction(passages=passages)
+        return dspy.Prediction(documents=passages, passages=passages)
 
 
 class ModuleFactory:

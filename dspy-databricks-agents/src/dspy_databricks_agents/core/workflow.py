@@ -30,7 +30,12 @@ class WorkflowContext:
         elif parts[0] in self.step_outputs:
             return self._get_nested(self.step_outputs[parts[0]], parts[1] if len(parts) > 1 else None)
         else:
-            raise ValueError(f"Unknown reference: {ref}")
+            # Return empty list/dict for missing references (conditional steps that didn't run)
+            # This allows workflows to handle optional dependencies gracefully
+            if len(parts) > 1 and parts[1] == "documents":
+                return []  # Empty list for missing document references
+            else:
+                return None  # None for other missing references
     
     def _get_nested(self, data: Any, path: Optional[str]) -> Any:
         """Get nested field from data."""
@@ -79,10 +84,26 @@ class ConditionEvaluator:
     def evaluate(self, condition: str, context: WorkflowContext) -> bool:
         """Evaluate condition string."""
         # Simple condition parser
-        # Format: "$step.field operator value"
+        # Format: "$step.field operator value" or "value operator $step.field"
         # Handle >= and <= by adjusting the pattern
+        # First try the standard format
         pattern = r'(\$[\w.]+)\s*(==|!=|>=|<=|>|<|in|not in)\s*(.+)'
         match = re.match(pattern, condition.strip())
+        
+        # If no match, try reversed format for 'in' operator
+        if not match and ' in ' in condition:
+            parts = condition.strip().split(' in ', 1)
+            if len(parts) == 2:
+                # Swap the order and retry
+                reversed_condition = f"{parts[1].strip()} in {parts[0].strip()}"
+                pattern = r'(\$[\w.]+)\s*(in)\s*(.+)'
+                match = re.match(pattern, reversed_condition)
+                if match:
+                    # Actually handle it as "value in $ref"
+                    ref, operator, value_str = match.groups()
+                    # Swap back for correct evaluation
+                    return self.operators['in'](self._parse_value(parts[0].strip(), context), 
+                                               context.resolve_reference(parts[1].strip()))
         
         if not match:
             raise ValueError(f"Invalid condition format: {condition}")

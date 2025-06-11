@@ -10,7 +10,7 @@ agent:
   dspy:
     # Use actual Databricks Foundation Model
     # Available models: databricks-meta-llama-3-1-70b-instruct, databricks-meta-llama-3-1-405b-instruct, etc.
-    lm_model: databricks/databricks-meta-llama-3-3-70b-instruct
+    lm_model: databricks-meta-llama-3-3-70b-instruct
     temperature: 0.5
     max_tokens: 3000
     optimizer:

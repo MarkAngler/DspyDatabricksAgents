@@ -57,6 +57,57 @@ DSPy-Databricks Agents enables you to:
 - **file_reader**: Reads file contents
 - **json_parser**: Parses and formats JSON data
 
+### Creating Custom Tools
+
+You can easily add custom tools for your ReAct agents by using the `ToolRegistry` decorator:
+
+```python
+# my_custom_tools.py
+from dspy_databricks_agents.core.tools import ToolRegistry
+
+@ToolRegistry.register("weather_api", "Gets weather information for a location")
+def weather_api(location: str) -> str:
+    """Fetch weather data for the given location."""
+    # Your implementation here
+    weather_data = fetch_weather(location)  # Your API call
+    return f"Weather in {location}: {weather_data['temp']}°F, {weather_data['condition']}"
+
+@ToolRegistry.register("jira_search", "Searches JIRA for issues")
+def jira_search(query: str) -> str:
+    """Search JIRA issues matching the query."""
+    # Your JIRA integration
+    issues = jira_client.search_issues(query)
+    return f"Found {len(issues)} issues: " + ", ".join([f"{i.key}: {i.summary}" for i in issues[:5]])
+
+@ToolRegistry.register("database_lookup", "Queries customer database")
+def database_lookup(customer_id: str) -> str:
+    """Look up customer information."""
+    # Your database query
+    customer = db.query(f"SELECT * FROM customers WHERE id = {customer_id}")
+    return f"Customer: {customer.name}, Status: {customer.status}, Since: {customer.created_date}"
+```
+
+Then use your custom tools in YAML:
+
+```yaml
+modules:
+  - name: support_agent
+    type: react
+    signature: "customer_query -> response, actions_taken"
+    tools:
+      - "weather_api"      # Your custom tool
+      - "jira_search"      # Your custom tool
+      - "database_lookup"  # Your custom tool
+      - "calculator"       # Built-in tool
+```
+
+**Important Notes:**
+- Tools must accept a single string parameter and return a string
+- Tools are automatically available after importing the module that registers them
+- If a tool is not found, a mock implementation is provided to prevent errors
+- Keep tool logic simple and focused on a single task
+- Handle errors gracefully within your tool implementation
+
 ### Production Features
 - **Deployment Automation**: One-command deployment to Databricks
 - **Monitoring**: Built-in metrics and observability
@@ -294,6 +345,76 @@ agent:
     serving_endpoint: string
     compute_size: string         # Small, Medium, Large
 ```
+
+### Workflow Variables and Custom Inputs
+
+DSPy-Databricks Agents supports dynamic workflow variables that can be referenced throughout your workflow configuration:
+
+#### Variable Reference Syntax
+- `$input.<field>` - Access fields from the initial workflow input (includes user query and custom inputs)
+- `$<step_name>.<output_field>` - Access outputs from previous workflow steps
+
+#### Using Custom Inputs
+
+You can pass custom parameters to your agent at runtime through the `custom_inputs` parameter:
+
+```python
+from dspy_databricks_agents import Agent
+from mlflow.types.agent import ChatAgentMessage
+
+# Load your agent
+agent = Agent.from_yaml("my_agent.yaml")
+
+# Pass custom inputs when calling the agent
+messages = [ChatAgentMessage(role="user", content="Write a blog post about AI")]
+
+custom_inputs = {
+    "style_guide": "Professional tone, avoid jargon, include examples",
+    "target_audience": "Business executives",
+    "max_length": 1000,
+    "include_citations": True
+}
+
+response = agent.predict(messages, custom_inputs=custom_inputs)
+```
+
+#### Example: Multi-Agent Workflow with Custom Inputs
+
+```yaml
+workflow:
+  # Step 1: Generate outline using custom style guide
+  - step: generate_outline
+    module: outline_generator
+    inputs:
+      topic: "$input.query"                    # User's message
+      style_guide: "$input.style_guide"        # From custom_inputs
+      audience: "$input.target_audience"       # From custom_inputs
+      
+  # Step 2: Write content based on outline
+  - step: write_content
+    module: content_writer
+    inputs:
+      outline: "$generate_outline.outline"     # Output from previous step
+      style_guide: "$input.style_guide"        # Reuse custom input
+      max_words: "$input.max_length"          # From custom_inputs
+      
+  # Step 3: Conditional review based on custom input
+  - step: technical_review
+    module: reviewer
+    condition: "$input.include_citations == True"
+    inputs:
+      content: "$write_content.content"
+      criteria: ["accuracy", "citations", "clarity"]
+```
+
+#### Common Use Cases for Custom Inputs
+- **Style Parameters**: tone, formality level, target audience
+- **Configuration Settings**: max_length, temperature overrides, format preferences  
+- **Context Data**: user preferences, session information, metadata
+- **Control Flags**: enable/disable features, conditional processing
+- **External Data**: API keys, database connections, file paths
+
+**Note**: Custom inputs are available throughout the workflow via `$input.<field>` references. They provide a powerful way to create configurable, reusable workflows without hardcoding values in your YAML configuration.
 
 ## 🧪 Testing
 

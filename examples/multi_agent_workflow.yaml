@@ -8,22 +8,15 @@ agent:
   description: Multi-agent pipeline for research, writing, and review
   
   dspy:
-    lm_model: databricks-llama-2-70b-chat
+    lm_model: databricks-meta-llama-3-3-70b-instruct
     temperature: 0.8
     max_tokens: 4000
     
-  # Import reusable agent configurations
-  imports:
-    - path: ./rag_research_agent.yaml
-      prefix: research
-    - path: ./code_review_agent.yaml  # Can review technical content
-      prefix: reviewer
-      
   modules:
-    # Research phase - imported from rag_research_agent
+    # Research phase - simplified research module
     - name: research_agent
-      type: imported
-      from: research.modules
+      type: chain_of_thought
+      signature: "query, required_sources -> key_points, synthesis, citations"
       
     # Writing phase - custom modules
     - name: outline_generator
@@ -38,10 +31,10 @@ agent:
       type: chain_of_thought
       signature: "draft_content, style_guide, target_audience -> edited_content, changes_made, suggestions"
       
-    # Review phase - can use imported reviewer
+    # Review phase - technical reviewer
     - name: technical_reviewer
-      type: imported
-      from: reviewer.modules.review_summarizer
+      type: chain_of_thought
+      signature: "content, criteria -> review_summary, issues_found, recommendations"
       
     # Final assembly
     - name: content_assembler
@@ -123,11 +116,11 @@ agent:
         citations: "$conduct_research.citations"
         
   deployment:
-    catalog: content
-    schema: pipelines
+    catalog: workspace
+    schema: default
     model_name: content_creation_pipeline
     serving_endpoint: content-generator
-    compute_size: Large
+    compute_size: small
     parallel_execution: true
     
   metadata:

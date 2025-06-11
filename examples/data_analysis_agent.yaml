@@ -8,7 +8,7 @@ agent:
   description: Natural language to SQL with insight generation and visualization
   
   dspy:
-    lm_model: databricks-meta-llama-3-70b-instruct
+    lm_model: databricks-meta-llama-3.3-70b-instruct
     temperature: 0.3  # Lower temperature for more consistent SQL generation
     max_tokens: 2000
     optimizer:

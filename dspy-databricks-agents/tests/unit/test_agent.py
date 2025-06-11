@@ -192,9 +192,13 @@ class TestDSPyDatabricksAgent:
         assert "classifier" in agent.modules
         assert "generator" in agent.modules
         
-        # DSPy configuration is skipped when lm is None (test mode)
-        # This is expected behavior for test environments
-        mock_dspy.settings.configure.assert_not_called()
+        # DSPy configuration should be called with a mock LM
+        # This ensures DSPy is always configured to avoid "No LM is loaded" errors
+        mock_dspy.settings.configure.assert_called_once()
+        # Check that it was called with an lm argument
+        call_args = mock_dspy.settings.configure.call_args
+        assert 'lm' in call_args.kwargs
+        assert call_args.kwargs['lm'] is not None
 
     @patch('mlflow.log_metrics')
     @patch('dspy_databricks_agents.core.agent.dspy')

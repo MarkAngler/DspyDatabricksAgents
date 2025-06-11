@@ -65,10 +65,10 @@ class DSPyAgentModel(mlflow.pyfunc.PythonModel):
 
     def predict(
         self,
-        context: mlflow.pyfunc.PythonModelContext,
-        model_input: Any,
-        params: Optional[Dict[str, Any]] = None,
-    ) -> Dict[str, Any]:
+        context,
+        model_input,
+        params=None,
+    ):
         """Process chat messages and return response.
 
         Args:

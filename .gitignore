@@ -5,6 +5,11 @@ test_mlruns/
 test_mlruns*/
 docs/
 claude-sparc.sh
+CLAUDE.md
+.roomodes
+.roo
+coordination
+memory
 # Python
 *.pyc
 __pycache__/
@@ -69,3 +74,7 @@ CLAUDE.local.md
 claude-sparc.md
 .gitignore
 .gitignore
+claude-flow
+coordination.md
+.gitignore
+memory-bank.md
